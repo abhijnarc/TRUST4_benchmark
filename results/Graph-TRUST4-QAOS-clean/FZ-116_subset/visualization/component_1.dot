@@ -1,0 +1,4 @@
+digraph component_1 {
+rankdir=LR;
+r4 [label="4\n150bp"];
+}

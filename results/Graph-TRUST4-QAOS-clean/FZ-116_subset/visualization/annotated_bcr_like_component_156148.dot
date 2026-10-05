@@ -1,0 +1,5 @@
+digraph annotated_bcr_like {
+rankdir=LR;
+r126147 [label="126147\n150bp\nSRR7882936.4897926"];
+r155599 [label="155599\n150bp\nSRR7882936.4912652"];
+}

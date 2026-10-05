@@ -1,0 +1,7 @@
+digraph multiple_paths {
+rankdir=LR;
+r1 [label="1\n150bp\nSRR7882936.329189"];
+r3 [label="3\n150bp\nSRR7882936.329190"];
+r1 -> r3 [label="ov=150 id=0.993333 QAOS=0.978953"];
+r3 -> r1 [label="ov=150 id=0.993333 QAOS=0.978953"];
+}

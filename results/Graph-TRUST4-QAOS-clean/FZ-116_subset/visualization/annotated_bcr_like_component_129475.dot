@@ -1,0 +1,6 @@
+digraph annotated_bcr_like {
+rankdir=LR;
+r129475 [label="129475\n150bp\nSRR7882936.4899590"];
+r156038 [label="156038\n150bp\nSRR7882936.4912873"];
+r129475 -> r156038 [label="ov=31 id=1 QAOS=0.940748"];
+}

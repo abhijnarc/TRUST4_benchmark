@@ -1,0 +1,11 @@
+digraph component_0 {
+rankdir=LR;
+r0 [label="0\n150bp"];
+r1 [label="1\n150bp"];
+r3 [label="3\n150bp"];
+r2 [label="2\n150bp"];
+r0 -> r1 [label="ov=87 id=1 q=0.998797"];
+r1 -> r0 [label="ov=87 id=1 q=0.998797"];
+r1 -> r2 [label="ov=87 id=1 q=0.998995"];
+r2 -> r1 [label="ov=87 id=1 q=0.998995"];
+}

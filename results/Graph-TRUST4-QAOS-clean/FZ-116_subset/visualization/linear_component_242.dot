@@ -1,0 +1,7 @@
+digraph linear {
+rankdir=LR;
+r242 [label="242\n150bp\nSRR7882936.627409"];
+r243 [label="243\n150bp\nSRR7882936.627409"];
+r242 -> r243 [label="ov=93 id=1 QAOS=0.998007"];
+r243 -> r242 [label="ov=93 id=1 QAOS=0.998007"];
+}

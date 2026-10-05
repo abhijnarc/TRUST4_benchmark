@@ -1,0 +1,19 @@
+digraph branched {
+rankdir=LR;
+r6 [label="6\n150bp\nSRR7882936.414866"];
+r8 [label="8\n150bp\nSRR7882936.414869"];
+r11 [label="11\n150bp\nSRR7882936.414871"];
+r13 [label="13\n150bp\nSRR7882936.415011"];
+r15 [label="15\n150bp\nSRR7882936.415012"];
+r6 -> r13 [label="ov=137 id=0.985401 QAOS=0.9336"];
+r6 -> r15 [label="ov=137 id=0.992701 QAOS=0.970599"];
+r8 -> r6 [label="ov=128 id=1 QAOS=0.999202"];
+r8 -> r11 [label="ov=144 id=1 QAOS=0.997393"];
+r8 -> r13 [label="ov=115 id=0.982609 QAOS=0.925773"];
+r8 -> r15 [label="ov=115 id=0.991304 QAOS=0.965907"];
+r11 -> r6 [label="ov=134 id=1 QAOS=0.996648"];
+r11 -> r13 [label="ov=121 id=0.983471 QAOS=0.926236"];
+r11 -> r15 [label="ov=121 id=0.991736 QAOS=0.964725"];
+r13 -> r15 [label="ov=150 id=0.98 QAOS=0.92048"];
+r15 -> r13 [label="ov=150 id=0.98 QAOS=0.92048"];
+}
