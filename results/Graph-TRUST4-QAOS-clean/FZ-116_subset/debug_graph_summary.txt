@@ -1,0 +1,42 @@
+total nodes: 200000
+total edges: 6658585
+connected components: 23717
+largest component size: 144616
+mean degree: 66.585850
+median degree: 47.0
+maximum degree: 3417
+number of isolated nodes: 22598
+number of branch nodes (raw edge degree > 2): 170677
+number of cycles if available: 691
+mean overlap: 32.2515
+median overlap: 31
+mean identity: 0.999442
+median identity: 1
+mean QAOS: 0.99315
+median QAOS: 0.99759
+linear component ID (minimum node_id): 155529
+linear component nodes / edge records / distinct branch nodes / max distinct degree: 10 / 12 / 3 / 4
+branched component ID (minimum node_id): 198262
+branched component nodes / edge records / distinct branch nodes / max distinct degree: 48 / 178 / 38 / 34
+high-degree center node_id: 8926
+high-degree center raw edge-record degree: 3417
+high-degree center distinct neighboring nodes: 3370
+high-degree neighborhood component ID: 7706
+example path contig_id: 1460
+example path component ID: 360
+accepted-edge QAOS sample size: 100
+QAOS scatter-sample range: 0.900000 .. 0.999841
+accepted-edge identity range: 0.935484 .. 1.000000
+accepted-edge QAOS range: 0.900000 .. 0.999841
+accepted-edge overlap range: 31 .. 150
+Pearson correlation, all accepted-edge identity vs QAOS: 0.831756
+
+duplicate read IDs in graph_nodes.tsv: 100000 names occur twice; edge endpoints are disambiguated by row-wise graph_edges.bed read_N IDs (coordinates unused)
+
+Orientation counts in graph_edges.tsv (source_orientation>target_orientation):
+  0>0: 2365816
+  0>1: 4292538
+  1>0: 35
+  1>1: 196
+
+BED orientation requires correction. graph_edges.bed carries orientation fields, but its source/target intervals are emitted as suffix/prefix coordinates without reflecting reverse-oriented endpoints. Graphviz uses edge labels/orientations from graph_edges.tsv and row-aligned BED endpoint IDs only; BED coordinates are ignored.

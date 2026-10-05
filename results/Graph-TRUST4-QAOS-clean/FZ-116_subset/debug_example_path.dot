@@ -1,0 +1,11 @@
+digraph "debug_example_path" {
+  graph [rankdir=LR, label="contig_1460 (component 360)", labelloc=t];
+  node [shape=box, fontsize=9, style="rounded,filled", fillcolor="#edf2f4"];
+  p0 [label="SRR7882936.1444001\nforward degree=1"];
+  p1 [label="SRR7882936.1443998\nforward degree=29"];
+  p2 [label="SRR7882936.1444003\nforward degree=10"];
+  p3 [label="SRR7882936.1444013\nreverse degree=13"];
+  p0 -> p1 [label="ov=82 id=1 QAOS=0.995876 ori=0>0", color="#277da1"];
+  p1 -> p2 [label="ov=73 id=1 QAOS=0.99974 ori=0>0", color="#277da1"];
+  p2 -> p3 [label="ov=62 id=1 QAOS=0.987734 ori=0>1", color="#43aa8b"];
+}

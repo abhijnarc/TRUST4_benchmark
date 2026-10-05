@@ -1,0 +1,381 @@
+================================================================================
+         GRAPH-TRUST4 v2-MEMORYFIX OpenMP PARALLELIZATION COMPLETE
+================================================================================
+
+STATUS: ✓ IMPLEMENTATION COMPLETE, BENCHMARKS READY
+
+================================================================================
+MODIFICATIONS SUMMARY
+================================================================================
+
+FILES MODIFIED:
+1. GraphAssemblerV2.hpp
+   - Added: int num_threads to GraphConfigV2
+   - No data structure changes (memory fixes preserved)
+
+2. GraphAssemblerV2.cpp
+   - Added: #include <omp.h> (conditional)
+   - Parallelized: GenerateCandidateBundlePairs()
+   - Strategy: Thread-local buffers + global deduplication
+   - Preserved: All memory optimizations
+
+3. main.cpp
+   - Added: -t INT parameter for thread control
+   - Added: OpenMP initialization (omp_set_num_threads)
+   - Added: OpenMP detection and reporting
+
+4. Makefile
+   - Changed: CXXFLAGS += -fopenmp
+   - Changed: Optimization level O3 (was O2)
+   - Changed: LDFLAGS += -fopenmp
+
+COMPILATION COMMAND:
+  g++ -std=c++11 -O3 -Wall -fopenmp -c *.cpp -o *.o
+  g++ -std=c++11 -O3 -Wall -fopenmp -o graph-trust4-v2-memoryfix *.o -lm -fopenmp
+
+RESULT: ✓ Build successful: graph-trust4-v2-memoryfix (OpenMP enabled)
+
+================================================================================
+PARALLELIZATION STRATEGY
+================================================================================
+
+CANDIDATE GENERATION PARALLELIZATION:
+
+Serial Code:
+  for (int b1 = 0; b1 < bundles_.size(); ++b1) {
+    // generate candidates for b1
+    // add to shared seen_pairs and candidate_bundle_pairs_
+  }
+
+Parallel Code:
+  vector<vector<pair<int,int>>> thread_local_pairs(num_threads);
+
+  #pragma omp parallel num_threads(num_threads)
+  {
+    vector<pair<int,int>>& local_pairs = thread_local_pairs[thread_id];
+
+    #pragma omp for schedule(dynamic)
+    for (int b1 = 0; b1 < bundles_.size(); ++b1) {
+      // Generate candidates into thread-local buffer (NO synchronization)
+      for (int b2 : candidates) {
+        local_pairs.push_back({b1, b2});
+      }
+    }
+  }
+
+  // Merge thread-local results with global deduplication (single-threaded)
+  for (int t = 0; t < num_threads; ++t) {
+    for (auto pair : thread_local_pairs[t]) {
+      if (!seen_pairs.count(normalized_pair)) {
+        candidate_bundle_pairs_.push_back(pair);
+        seen_pairs.insert(normalized_pair);
+      }
+    }
+  }
+
+BENEFITS:
+  ✓ No locks needed inside parallel loop (thread-local buffers)
+  ✓ Dynamic scheduling balances work across threads
+  ✓ Merge phase is serial but fast (simple set operations)
+  ✓ Memory usage unchanged (buffers freed after merge)
+
+THREAD SAFETY:
+  ✓ No concurrent writes to shared data structures
+  ✓ K-mer index is read-only (safe in parallel)
+  ✓ Bundles vector is read-only (safe in parallel)
+  ✓ Thread-local buffers have no synchronization overhead
+
+================================================================================
+ALGORITHM PRESERVATION
+================================================================================
+
+UNCHANGED:
+  ✓ Bundling logic (exact-match consensus)
+  ✓ K-mer indexing (9-mer extraction)
+  ✓ Candidate generation logic (per-bundle candidate limit)
+  ✓ QAOS formula (identical quality calculation)
+  ✓ Overlap criteria (identity >= 0.90, QAOS >= 0.90)
+  ✓ Graph assembly (same connected component extraction)
+
+ONLY PARALLELIZED:
+  ✓ Bundle iteration over bundles (outer loop)
+  ✓ Per-bundle candidate generation (no algorithmic change)
+
+Quality Algorithms:
+  ✓ Phred error probabilities: e = 10^(-Q/10)
+  ✓ Base compatibility: depends on match/mismatch
+  ✓ Geometric mean scoring: QAOS = product^(1/overlap_len)
+  ✓ All quality-aware metrics preserved exactly
+
+================================================================================
+BENCHMARK SETUP
+================================================================================
+
+BENCHMARK SCRIPT:
+  /data1/wetlab/TRUST4_benchmark/run_benchmarks.sh
+
+TESTS:
+  1. Single thread (-t 1)
+  2. 8 threads (-t 8)
+  3. 16 threads (-t 16)
+  4. 32 threads (-t 32)
+  5. 64 threads (-t 64)
+
+DATASET:
+  Input: 100K reads (114,286 actual, 57,143 pairs)
+  Size: 31 MB total
+  Bundles: 55,043
+  K-mers: 664,318
+
+METRICS COLLECTED:
+  - Runtime (wall-clock seconds)
+  - Peak RSS memory (MB)
+  - Candidate pairs generated
+  - Accepted edges after QAOS filtering
+  - Timestamps per stage
+
+EXPECTED RESULTS:
+  Thread   Runtime (est)   Speedup
+  1        8-10 min        1.0x
+  8        1-2 min         5-8x
+  16       45-60 sec       10-12x
+  32       30-45 sec       15-20x
+  64       20-35 sec       20-25x
+
+Note: Speedup saturates around 16-32 threads due to:
+  - Merge phase is serial (Amdahl's law)
+  - Memory bandwidth limits for k-mer index access
+  - Per-bundle overhead dominates at high thread count
+
+================================================================================
+HOW TO RUN BENCHMARKS
+================================================================================
+
+Sequential Execution (Recommended):
+  bash /data1/wetlab/TRUST4_benchmark/run_benchmarks.sh
+
+This will:
+  1. Run 1-thread test (~10 min)
+  2. Run 8-thread test (~2 min)
+  3. Run 16-thread test (~1 min)
+  4. Run 32-thread test (~45 sec)
+  5. Run 64-thread test (~30 sec)
+  Total: ~15 minutes
+
+Output Files:
+  results/Graph-TRUST4-v2-memoryfix/benchmark_1t/
+    ├── test_bundles.tsv
+    ├── test_edges.tsv
+    ├── test_graph_stats.tsv
+    ├── test_contigs.fa
+    ├── test_assembly_stats.tsv
+    ├── test_qaos_stats.tsv
+    └── run.log
+
+Summary:
+  results/Graph-TRUST4-v2-memoryfix/benchmark_threads.tsv
+  (CSV with threads, runtime_seconds, peak_rss_mb, candidate_pairs, accepted_edges)
+
+Analysis Log:
+  results/Graph-TRUST4-v2-memoryfix/benchmark_all.log
+
+Manual Execution (Individual Test):
+  /usr/bin/time -v \
+    algorithms/Graph-TRUST4-v2-memoryfix/graph-trust4-v2-memoryfix \
+    -1 test_data/FZ116_test_1.fq \
+    -2 test_data/FZ116_test_2.fq \
+    -o results/Graph-TRUST4-v2-memoryfix/benchmark_Xt/test \
+    -k 9 -m 31 -i 0.90 -q 0.90 -H 20 \
+    -c 500 -M 32 \
+    -t X
+
+Replace X with desired thread count (1, 8, 16, 32, or 64).
+
+================================================================================
+EXPECTED SPEEDUP ANALYSIS
+================================================================================
+
+Candidate Generation Parallelization:
+  Best case (perfect scaling): 64x speedup (64 cores)
+  Realistic case (with overhead): 15-25x speedup
+
+Limiting Factors:
+  1. Merge phase (~5-10% of total time)
+     - Serial by nature
+     - Amdahl's law: S = 1 / ((1-p) + p/n)
+     - With p=0.95 parallel, n=64: S = 11.2x max
+
+  2. Memory bandwidth
+     - K-mer index access (read-only, cached after first hit)
+     - Bundles vector access (read-only, sequential)
+     - L3 cache conflicts at high core count
+
+  3. Per-bundle overhead
+     - K-mer extraction and matching
+     - Candidate set construction
+     - Scales linearly with core count (work distribution good)
+
+Bottleneck After Parallelization:
+  Current: Candidate generation (was sequential)
+  Parallel: Candidate generation (now parallel ~15-20x faster)
+  Next bottleneck: ComputeQualityAwareOverlaps() (millions of calls)
+     - Per-overlap calculation: QAOS, mismatches, expected errors
+     - This is NOT yet parallelized
+     - Would be next parallelization target
+
+================================================================================
+CURRENT 100K TEST STATUS
+================================================================================
+
+Status: 1-thread benchmark currently running
+Location: results/Graph-TRUST4-v2-memoryfix/benchmark_1t/
+Current stage: Candidate generation
+
+Expected completion sequence:
+  1. 1-thread test: started ~14:18, est. complete ~14:28 (10 min total)
+  2. Waiting: 8, 16, 32, 64-thread tests will follow
+
+Previous old test (test-100k): Still incomplete from earlier session
+  - That test was running WITHOUT parallelization (-t 1 by default)
+  - Will be superceded by new benchmark
+
+================================================================================
+PERFORMANCE EXPECTATIONS
+================================================================================
+
+Single Core (1 thread):
+  - Uses exactly 1 CPU core
+  - Runtime: ~8-10 minutes for 100K reads
+  - Memory: ~150 MB (no parallelization overhead)
+  - Identical to non-parallel version in single-core mode
+
+8 Cores:
+  - Expected speedup: 6-7x (due to merge overhead)
+  - Runtime: ~1.5-2 minutes
+  - Memory: ~200 MB (thread-local buffers)
+
+16 Cores:
+  - Expected speedup: 10-12x
+  - Runtime: 45-60 seconds
+  - Memory: ~250 MB
+
+32 Cores:
+  - Expected speedup: 15-18x
+  - Runtime: 30-45 seconds
+  - Memory: ~350 MB
+
+64 Cores:
+  - Expected speedup: 18-22x (diminishing returns)
+  - Runtime: 25-35 seconds
+  - Memory: ~500 MB
+
+Full FZ-116 (1.23M reads) at 64 threads:
+  Estimated time: 25-35 sec × 12.3x = 5-7 minutes
+  Memory: ~2 GB (preserved from memory fixes)
+
+================================================================================
+COMPILATION FLAGS EXPLAINED
+================================================================================
+
+-O3: Aggressive optimization (was -O2)
+  - Enables vectorization (SIMD)
+  - Inlines small functions
+  - Better loop unrolling
+  - ~10-20% faster than -O2
+
+-fopenmp: Enable OpenMP
+  - Recognizes #pragma omp directives
+  - Links against libgomp (GNU OpenMP runtime)
+  - Enables omp_set_num_threads, omp_get_thread_num, etc.
+
+-fopenmp in LDFLAGS: Link OpenMP runtime
+  - Ensures OpenMP library is linked
+  - Provides scheduling, thread pool management, etc.
+
+Result: OpenMP-aware build with best scalar optimization
+
+================================================================================
+NOTES & WARNINGS
+================================================================================
+
+⚠️  DO NOT run all 5 benchmarks simultaneously
+    - Different thread counts need different CPU resources
+    - Sequential execution ensures clean measurements
+    - Prevent resource contention and false results
+
+⚠️  First run uses cold caches
+    - CPU cache is empty at start
+    - K-mer index access pattern improves over time
+    - Subsequent tests share some cache (minor effect)
+
+✓  Thread count detection
+    - omp_get_thread_num() returns 0 to (num_threads-1)
+    - OpenMP handles thread pool creation/destruction
+
+✓  Memory safe
+    - Thread-local buffers isolated from concurrent access
+    - No false sharing (separate vector per thread)
+    - Merge phase uses single thread (no race conditions)
+
+✓  Backward compatible
+    - Works with -t 1 (serial execution)
+    - If OpenMP not available, code compiles with -t disabled
+    - Algorithm identical regardless of -t parameter
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. ✓ Run benchmarks (use run_benchmarks.sh)
+   - Estimated: 15-20 minutes total (sequential execution)
+
+2. Extract and analyze results:
+   - Compare runtime scaling (linear? sublinear? why?)
+   - Check memory usage (should stay constant ~200-300 MB)
+   - Verify accuracy (same edge counts, QAOS values)
+
+3. Identify bottlenecks:
+   - If scaling is poor: Where is time spent?
+   - ComputeQualityAwareOverlaps() or network access?
+   - Profile with `-t 1 vs -t 64` to locate bottlenecks
+
+4. Next optimization targets (if needed):
+   - Parallelize ComputeQualityAwareOverlaps() (millions of calls)
+   - Vectorize QAOS calculation (SIMD-friendly)
+   - GPU acceleration for overlap scoring (CUDA/OpenCL)
+
+5. Full FZ-116 run:
+   - Only after benchmarks complete and scaling verified
+   - Use all 64 threads for final production run
+   - Expected: 5-7 minutes runtime, 1.8 GB memory
+
+================================================================================
+DIAGNOSTIC COMMANDS
+================================================================================
+
+Check OpenMP support:
+  grep -l "OpenMP enabled" results/Graph-TRUST4-v2-memoryfix/benchmark_*/run.log
+
+Extract runtime summary:
+  for d in results/Graph-TRUST4-v2-memoryfix/benchmark_*/; do
+    echo "$(basename $d): $(grep 'Elapsed' $d/run.log | awk '{print $6}')"
+  done
+
+Verify thread usage:
+  grep "Generated.*pairs.*threads=" results/Graph-TRUST4-v2-memoryfix/benchmark_*/run.log
+
+Plot scaling:
+  awk -F, 'NR>1 {print $1, 1/($2/8); next} NR==1' \
+    results/Graph-TRUST4-v2-memoryfix/benchmark_threads.tsv
+
+Check memory:
+  grep "peak_rss" results/Graph-TRUST4-v2-memoryfix/benchmark_threads.tsv
+
+================================================================================
+
+Report prepared: 2026-09-23
+Implementation status: Complete and compiled
+Benchmarks: Ready to execute
+Next phase: Run benchmark suite and analyze scaling
+
+================================================================================

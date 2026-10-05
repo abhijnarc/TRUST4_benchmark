@@ -1,0 +1,27 @@
+digraph "debug_linear_component" {
+  graph [overlap=false, splines=true, label="Simple component 155529", labelloc=t];
+  node [shape=box, fontsize=9, style="rounded,filled", fillcolor="#edf2f4"];
+  edge [fontsize=7, arrowsize=0.55];
+  n155529 [label="SRR7882936.4912617\nnode=155529 degree=4"];
+  n161908 [label="SRR7882936.4916096\nnode=161908 degree=2"];
+  n161911 [label="SRR7882936.4916097\nnode=161911 degree=1"];
+  n161913 [label="SRR7882936.4916098\nnode=161913 degree=2"];
+  n161915 [label="SRR7882936.4916099\nnode=161915 degree=4"];
+  n161917 [label="SRR7882936.4916100\nnode=161917 degree=3"];
+  n161966 [label="SRR7882936.4916125\nnode=161966 degree=2"];
+  n161970 [label="SRR7882936.4916127\nnode=161970 degree=2"];
+  n161972 [label="SRR7882936.4916128\nnode=161972 degree=2"];
+  n170183 [label="SRR7882936.4921565\nnode=170183 degree=2"];
+  n170183 -> n161908 [label="ov=37 id=1 QAOS=0.999361 ori=0>0", color="#277da1"];
+  n170183 -> n161913 [label="ov=37 id=1 QAOS=0.998023 ori=0>0", color="#277da1"];
+  n161966 -> n161915 [label="ov=47 id=0.978723 QAOS=0.919161 ori=0>0", color="#277da1"];
+  n161966 -> n161917 [label="ov=47 id=0.978723 QAOS=0.919346 ori=0>0", color="#277da1"];
+  n161970 -> n161915 [label="ov=34 id=1 QAOS=0.999768 ori=0>0", color="#277da1"];
+  n161970 -> n161917 [label="ov=34 id=1 QAOS=0.999604 ori=0>0", color="#277da1"];
+  n161972 -> n161915 [label="ov=34 id=1 QAOS=0.999768 ori=0>0", color="#277da1"];
+  n161972 -> n161917 [label="ov=34 id=1 QAOS=0.999604 ori=0>0", color="#277da1"];
+  n161908 -> n155529 [label="ov=37 id=1 QAOS=0.997704 ori=0>0", color="#277da1"];
+  n161911 -> n155529 [label="ov=37 id=1 QAOS=0.995424 ori=0>0", color="#277da1"];
+  n161913 -> n155529 [label="ov=37 id=1 QAOS=0.999414 ori=0>0", color="#277da1"];
+  n161915 -> n155529 [label="ov=37 id=1 QAOS=0.979136 ori=0>0", color="#277da1"];
+}
